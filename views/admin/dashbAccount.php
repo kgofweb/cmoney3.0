@@ -49,6 +49,30 @@
   $getTransctionsInfgos = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
   $getTransctionsInfgos->execute();
 
+  // Logic to show only transactions sent buy account
+  $getTransctionsByAccount = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
+  $getTransctionsByAccount->execute();
+  // Transaction recues par le suatres agents
+  $getTransctionsByOtherAccount = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
+  $getTransctionsByOtherAccount->execute();
+  // Transaction recues via le site
+  $getTransctionsViaWebSite = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
+  $getTransctionsViaWebSite->execute();
+  // Transaction via Site
+  $transaction_siteAF = $db->prepare("SELECT * FROM `new_transaction` WHERE af_name = ? ORDER BY date DESC");
+  $transaction_siteAF->execute([$login_name]);
+
+  // ================= Transactions compte CHAPMONEY ================= //
+  $getTransctionsByAccountCM = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
+  $getTransctionsByAccountCM->execute();
+  // Payer (Retrait Site)
+  $set_payer_siteTransaction = $db->prepare("SELECT * FROM `retrait` WHERE payer = ?");
+  $set_payer_siteTransaction->execute([$login_name]);
+  // Transaction Paiement Manuel
+  $getTransctionsPaiementManuel = $db->prepare("SELECT * FROM `manuel_transaction` ORDER BY id DESC");
+  $getTransctionsPaiementManuel->execute();
+
+
   // Check Transaction
   $checkTransactionStatut = $db->prepare("SELECT statut, trans_gains FROM `manuel_transaction` WHERE current_agent_name = ?");
   $checkTransactionStatut->execute([$login_name]);
@@ -223,7 +247,6 @@
   ?>
 
   <section id="sec-1"></section>
-
   <!-- Scroll Down -->
   <div class="text-center">
     <a href="#sec-2" class="scroll_d">
@@ -240,47 +263,23 @@
       <div class="card-body">
         <h6><i class="fa-solid fa-rotate-right"></i> Historique de transactions</h6>
 
-
-        <!-- ======================== Tabullations Systems ======================== -->
-        <ul class="nav nav-pills fw-bold mb-3" id="pills-tab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">T. Manuelles</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">T. Site</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">T. Agents</button>
-          </li>
-        </ul>
-        <!-- ======================== Tabullations Systems ======================== -->
-        <div class="tab-content" id="pills-tabContent">
-          <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
-            <!-- Slmts le stransactions effectuées par l'agent en question -->
-            <div class="table-responsive" id="no-more-tables">
-              <table class="table table-hover table-bordered table-striped table-sm">
-                <thead class="bg-dark text-white text-center fw-bold">
-                  <tr>
-                    <td>ID</td>
-                    <td>Type T.</td>
-                    <td>Agent</td>
-                    <td>Somme</td>
-                    <td>Réseaux</td>
-                    <td>Bénéficiaire</td>
-                    <td>Statut</td>
-                    <td>Téléphone</td>
-                  </tr>
-                </thead>
-                <tbody class="text-center">
-                  
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">...</div>
-          <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab" tabindex="0">...</div>
-          <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
-        </div>
+        <!-- Affichage dans les diffrents comptes -->
+        <?php
+          if ($acc_type == 'Afrique') {
+            ?>
+              <!-- ======= Compte Afrique ======= -->
+              <?php include '../../views/admin/accountShowing/afriqueAccount.php'; ?>
+            <?php
+          } else if ($acc_type == 'ChapMoney') {
+            ?>
+              <!-- ======= Compte ChapMoney ======= -->
+              <?php include '../../views/admin/accountShowing/chapmoneyAccount.php'; ?>
+            <?php
+          } else if ($acc_type == 'Payeur') {
+            
+          }
+        ?>
+        
 
 
 
@@ -440,7 +439,6 @@
                               <?php
                             } 
                           ?>
-                          
                           <td data-title='A transférer'> 
                             <?php
                               if ($acc_type == 'Afrique') {
@@ -593,6 +591,7 @@
                           <td data-title='Type'>
                             <span style="background-color: #27ae60;" class="badge text-white fw-bold">
                               <i class="fa-solid fa-circle-arrow-left"></i>
+                              P. Manuel
                             </span>
                           </td>
                           <td data-title='Pays Agent'> <?= '---'; ?> </td>
